@@ -68,6 +68,12 @@ function loadMotionProfiles(){
   }));
   return cleaned.length ? cleaned : DEFAULT_MOTIONS.map(m => ({...m}));
 }
+function getVisibleMotionProfiles(){
+  if (!$('posterStage')) return motionProfiles;
+  // ポスター画面は6種類の固定スロット。追加した動きプロンプトは effect ごとの追加指示として統合する。
+  return DEFAULT_MOTIONS.map(def => motionProfiles.find(m => m.effect === def.effect) || {...def});
+}
+
 function getActivePrompt(){
   const profiles = readJson("oekaki.promptProfiles");
   if (Array.isArray(profiles) && profiles.length) {
@@ -83,6 +89,19 @@ function currentMotionIds(){
 }
 function currentMotionConfigs(){
   const ids = new Set(currentMotionIds());
+  if ($('posterStage')) {
+    const visible = getVisibleMotionProfiles();
+    const effects = new Set(visible.filter(m => ids.has(m.id)).map(m => m.effect));
+    const configured = motionProfiles.filter(m => effects.has(m.effect));
+    // その effect に保存済みプロンプトがない場合だけ、画面用の初期値を使う。
+    effects.forEach(effect => {
+      if (!configured.some(m => m.effect === effect)) {
+        const fallback = DEFAULT_MOTIONS.find(m => m.effect === effect);
+        if (fallback) configured.push({...fallback});
+      }
+    });
+    return configured;
+  }
   return motionProfiles.filter(m => ids.has(m.id));
 }
 function selectedEffects(motions){ return [...new Set(motions.map(m => m.effect))]; }
@@ -101,14 +120,15 @@ function motionVisual(m){
 
 function renderMotions(){
   const list = $("motionList");
+  const visibleProfiles = getVisibleMotionProfiles();
   const stored = readJson("oekaki.selectedMotionIds");
-  const existingIds = new Set(motionProfiles.map(m => m.id));
+  const existingIds = new Set(visibleProfiles.map(m => m.id));
   let selected = Array.isArray(stored) ? stored.filter(id => existingIds.has(id)) : [];
-  if (!selected.length && motionProfiles.length) selected = [motionProfiles.find(m=>m.id === "jump")?.id || motionProfiles[0].id];
+  if (!selected.length && visibleProfiles.length) selected = [visibleProfiles.find(m=>m.effect === "jump")?.id || visibleProfiles[0].id];
   const selectedSet = new Set(selected);
   list.innerHTML = "";
 
-  motionProfiles.forEach(m => {
+  visibleProfiles.forEach(m => {
     const label = document.createElement("label");
     label.className = "motion-item";
     const input = document.createElement("input");
@@ -141,7 +161,7 @@ function updateReadyState(){
   apiState.style.color = hasKey ? "#19724a" : "#b63c50";
   promptState.textContent = `使用プロンプト：${active.name}`;
   goSettings.classList.toggle("hidden", hasKey);
-  createBtn.disabled = !(hasKey && chosenFile && currentMotionIds().length);
+  createBtn.disabled = $('posterStage') ? false : !(hasKey && chosenFile && currentMotionIds().length);
 }
 
 function setFile(file){
@@ -298,7 +318,10 @@ async function makeGif(pngBlob,motions){
 
 createBtn.addEventListener("click",async()=>{
   clearError();
-  const motions=currentMotionConfigs(); if(!chosenFile||!motions.length)return;
+  const motions=currentMotionConfigs();
+  if(!getApiKey().trim()){ showError("APIキーが未設定です。右上の「設定」からAPIキーを入力してください。"); return; }
+  if(!chosenFile){ showError("先に「カメラで撮る」または「画像を選ぶ」から絵を取り込んでください。"); return; }
+  if(!motions.length){ showError("動きを1つ以上選んでください。"); return; }
   createBtn.disabled=true;
   try{
     setStatus("イラストを作成中…",`「${getActivePrompt().name}」と動きプロンプトを使って生成しています。`);
@@ -308,7 +331,8 @@ createBtn.addEventListener("click",async()=>{
     const gifBlob=await makeGif(pngBlob,motions);
     if(gifUrl)URL.revokeObjectURL(gifUrl); gifUrl=URL.createObjectURL(gifBlob); gifResult.src=gifUrl; gifDownload.href=gifUrl;
     $("motionSummary").textContent="動き: "+motions.map(m=>m.name).join(" ＋ ");
-    hideStatus(); resultsWrap.classList.remove("hidden"); resultsWrap.scrollIntoView({behavior:"smooth",block:"start"});
+    hideStatus(); resultsWrap.classList.remove("hidden");
+    (document.querySelector(".png-result-box") || resultsWrap).scrollIntoView({behavior:"smooth",block:"center"});
   }catch(err){
     hideStatus(); const msg=String(err?.message||err);
     if(msg.includes("Failed to fetch")) showError("APIへ接続できませんでした。通信状態、APIキー、ブラウザの通信制限を確認してください。"); else showError(msg);
