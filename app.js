@@ -410,4 +410,4 @@ gifShare.addEventListener("click",()=>shareOutput(gifOutputBlob,"animation.gif",
 renderMotions();
 updateReadyState();
 
-if("serviceWorker" in navigator && location.protocol === "https") addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+// v9.1.3: Service Worker registration disabled to avoid stale UI after deployments.
