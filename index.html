@@ -13,9 +13,10 @@
 </head>
 <body>
   <main class="poster-stage" id="posterStage" aria-label="おえかきジャンプ">
+    <!-- 静的な装飾・イラストは元画像をそのまま使う -->
     <img class="poster-image" src="./oekaki-jump.png" width="864" height="1536" alt="おえかきジャンプのメイン画面">
 
-    <!-- 画像そのものを画面として使用し、その上に操作領域だけを重ねています。 -->
+    <!-- 操作が必要な部分だけ実DOMを重ねる -->
     <a class="hit settings-hit" href="./settings.html" aria-label="設定を開く"><span class="sr-only">設定</span></a>
 
     <button id="cameraBtn" class="hit camera-hit" type="button" aria-label="カメラで撮る"><span class="sr-only">カメラで撮る</span></button>
@@ -31,14 +32,20 @@
     </div>
     <div id="samplePreview" class="hidden" aria-hidden="true"></div>
 
-    <div id="motionList" class="motion-hit-grid" aria-label="動きを選ぶ"></div>
+    <!-- 6枚の見た目は元画像から切り出した素材。選択状態だけHTML/CSSで動かす -->
+    <div id="motionList" class="motion-live-grid" aria-label="動きを選ぶ"></div>
 
-    <div class="range-hit strength-hit">
+    <!-- スライダーは完全にHTML/CSS。ノブが実際に動く -->
+    <div class="slider-live strength-live">
+      <div class="slider-title"><span class="slider-symbol resize-symbol">↗↙</span><strong>動きの大きさ</strong></div>
       <input id="motionStrength" type="range" min="50" max="150" value="100" step="10" aria-label="動きの大きさ">
+      <div class="slider-labels"><span>やさしめ</span><span>大きめ</span></div>
       <span id="motionStrengthLabel" class="sr-only">ふつう</span>
     </div>
-    <div class="range-hit speed-hit">
+    <div class="slider-live speed-live">
+      <div class="slider-title"><span class="slider-symbol">◔</span><strong>動きの速さ</strong></div>
       <input id="motionSpeed" type="range" min="70" max="150" value="100" step="10" aria-label="動きの速さ">
+      <div class="slider-labels"><span>ゆっくり</span><span>はやい</span></div>
       <span id="motionSpeedLabel" class="sr-only">ふつう</span>
     </div>
 
@@ -54,16 +61,17 @@
     </div>
     <div id="error" class="toast error-toast hidden" role="alert"></div>
 
+    <!-- 生成後は元画像の結果エリアと同じ位置を実データで置き換える -->
     <section id="resultsWrap" class="results-overlay hidden" aria-label="生成結果">
       <div class="generated-result png-result-box">
         <img id="pngResult" alt="完成した背景透過イラスト">
       </div>
-      <a id="pngDownload" class="hit png-save-hit" download="illustration.png" aria-label="PNGを保存"><span class="sr-only">PNGを保存</span></a>
+      <a id="pngDownload" class="live-save png-save" download="illustration.png" href="#" aria-label="PNGを保存">⇩ 保存</a>
 
       <div class="generated-result gif-result-box">
         <img id="gifResult" alt="動く背景透過GIF">
       </div>
-      <a id="gifDownload" class="hit gif-save-hit" download="animation.gif" aria-label="GIFを保存"><span class="sr-only">GIFを保存</span></a>
+      <a id="gifDownload" class="live-save gif-save" download="animation.gif" href="#" aria-label="GIFを保存">⇩ 保存</a>
       <p id="motionSummary" class="sr-only"></p>
     </section>
   </main>
