@@ -131,6 +131,7 @@ function renderMotions(){
   visibleProfiles.forEach(m => {
     const label = document.createElement("label");
     label.className = "motion-item";
+    label.dataset.effect = m.effect || m.id;
     const input = document.createElement("input");
     input.type = "checkbox";
     input.dataset.motion = m.id;
@@ -161,7 +162,7 @@ function updateReadyState(){
   apiState.style.color = hasKey ? "#19724a" : "#b63c50";
   promptState.textContent = `使用プロンプト：${active.name}`;
   goSettings.classList.toggle("hidden", hasKey);
-  createBtn.disabled = $('posterStage') ? false : !(hasKey && chosenFile && currentMotionIds().length);
+  createBtn.disabled = !(hasKey && chosenFile && currentMotionIds().length);
 }
 
 function setFile(file){
@@ -192,8 +193,14 @@ $("clearImage").addEventListener("click", () => {
 
 function labelFromRange(v){ v=Number(v); return v < 85 ? "ひかえめ" : v > 115 ? "大きめ" : "ふつう"; }
 function speedLabel(v){ v=Number(v); return v < 90 ? "ゆっくり" : v > 115 ? "速め" : "ふつう"; }
-motionStrength.addEventListener("input", () => $("motionStrengthLabel").textContent = labelFromRange(motionStrength.value));
-motionSpeed.addEventListener("input", () => $("motionSpeedLabel").textContent = speedLabel(motionSpeed.value));
+function paintRange(input){
+  const min=Number(input.min)||0,max=Number(input.max)||100,val=Number(input.value);
+  const pct=((val-min)/(max-min))*100;
+  input.style.setProperty("--pct", `${pct}%`);
+}
+motionStrength.addEventListener("input", () => { $("motionStrengthLabel").textContent = labelFromRange(motionStrength.value); paintRange(motionStrength); });
+motionSpeed.addEventListener("input", () => { $("motionSpeedLabel").textContent = speedLabel(motionSpeed.value); paintRange(motionSpeed); });
+paintRange(motionStrength); paintRange(motionSpeed);
 
 function clearError(){ errorBox.classList.add("hidden"); errorBox.textContent = ""; }
 function showError(msg){ errorBox.textContent = msg; errorBox.classList.remove("hidden"); }
@@ -338,6 +345,17 @@ createBtn.addEventListener("click",async()=>{
     if(msg.includes("Failed to fetch")) showError("APIへ接続できませんでした。通信状態、APIキー、ブラウザの通信制限を確認してください。"); else showError(msg);
   }finally{updateReadyState();}
 });
+
+function installDownload(link, filename){
+  link.addEventListener("click", (ev) => {
+    const href=link.getAttribute("href");
+    if(!href || href === "#"){ ev.preventDefault(); return; }
+    // download属性を毎回明示。Blob URLを直接開く端末でも長押し/共有が使える。
+    link.setAttribute("download", filename);
+  });
+}
+installDownload(pngDownload,"illustration.png");
+installDownload(gifDownload,"animation.gif");
 
 renderMotions();
 updateReadyState();
