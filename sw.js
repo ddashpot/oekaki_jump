@@ -1,4 +1,4 @@
-const CACHE = "oekaki-jump-v5";
+const CACHE = "oekaki-jump-v6-reference-ui";
 const ASSETS = [
   "./","./index.html","./settings.html","./style.css","./app.js","./settings.js",
   "./manifest.json","./manifest.webmanifest","./icon-192.png","./icon-512.png"
