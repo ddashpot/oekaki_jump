@@ -1,7 +1,13 @@
-const CACHE = "oekaki-jump-v7-poster-screen-r2";
+const CACHE = "oekaki-jump-v8-1-hybrid-transfer-fix";
 const ASSETS = [
   "./","./index.html","./settings.html","./style.css","./screen.css","./app.js","./settings.js","./oekaki-jump.png",
-  "./manifest.json","./manifest.webmanifest","./icon-192.png","./icon-512.png"
+  "./assets/motions/jump.png",
+  "./assets/motions/sway.png",
+  "./assets/motions/float.png",
+  "./assets/motions/rotate.png",
+  "./assets/motions/shake.png",
+  "./assets/motions/squash.png",
+  "./manifest.json","./icon-192.png"
 ];
 
 self.addEventListener("install", e => {
