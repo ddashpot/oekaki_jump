@@ -3,184 +3,83 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ffe476">
-  <meta name="description" content="子どもの絵を背景透過PNGと動くGIFにするウェブアプリ">
+  <meta name="theme-color" content="#fff2a8">
+  <meta name="description" content="子どもの絵をイラストにして動くGIFを作るウェブアプリ">
   <title>おえかきジャンプ</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon-192.png">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./screen.css">
 </head>
-<body class="home-page">
-  <div class="page-decor decor-left" aria-hidden="true"><span></span><span></span><span></span></div>
-  <div class="page-decor decor-right" aria-hidden="true"><span></span><span></span><span></span></div>
+<body>
+  <main class="poster-stage" id="posterStage" aria-label="おえかきジャンプ">
+    <img class="poster-image" src="./oekaki-jump.png" width="864" height="1536" alt="おえかきジャンプのメイン画面">
 
-  <main class="shell home-shell">
-    <header class="topbar">
-      <div class="brand">
-        <img class="brand-icon" src="./icon-192.png" alt="">
-        <div class="brand-copy">
-          <h1>おえかき<span>ジャンプ</span></h1>
-          <p>絵をイラストにして、好きな動きをつける</p>
-        </div>
+    <!-- 画像そのものを画面として使用し、その上に操作領域だけを重ねています。 -->
+    <a class="hit settings-hit" href="./settings.html" aria-label="設定を開く"><span class="sr-only">設定</span></a>
+
+    <button id="cameraBtn" class="hit camera-hit" type="button" aria-label="カメラで撮る"><span class="sr-only">カメラで撮る</span></button>
+    <label class="hit gallery-hit" aria-label="画像を選ぶ">
+      <input id="galleryInput" class="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/*">
+      <span class="sr-only">画像を選ぶ</span>
+    </label>
+    <input id="cameraFallback" class="file-input" type="file" accept="image/*" capture="environment">
+
+    <div id="previewWrap" class="preview-overlay hidden" aria-live="polite">
+      <img id="preview" alt="選択した画像">
+      <button id="clearImage" class="preview-clear" type="button" aria-label="画像を取り消す">×</button>
+    </div>
+    <div id="samplePreview" class="hidden" aria-hidden="true"></div>
+
+    <div id="motionList" class="motion-hit-grid" aria-label="動きを選ぶ"></div>
+
+    <div class="range-hit strength-hit">
+      <input id="motionStrength" type="range" min="50" max="150" value="100" step="10" aria-label="動きの大きさ">
+      <span id="motionStrengthLabel" class="sr-only">ふつう</span>
+    </div>
+    <div class="range-hit speed-hit">
+      <input id="motionSpeed" type="range" min="70" max="150" value="100" step="10" aria-label="動きの速さ">
+      <span id="motionSpeedLabel" class="sr-only">ふつう</span>
+    </div>
+
+    <button id="create" class="hit create-hit" type="button" disabled aria-label="イラストとGIFを作る"><span class="sr-only">イラストとGIFを作る</span></button>
+
+    <div id="apiState" class="sr-only">API設定を確認中…</div>
+    <div id="promptState" class="sr-only"></div>
+    <a id="goSettings" class="sr-only hidden" href="./settings.html">API設定を開く</a>
+
+    <div id="status" class="toast status-toast hidden" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <div><strong id="statusTitle">作成中…</strong><p id="statusText">少し時間がかかることがあります。</p></div>
+    </div>
+    <div id="error" class="toast error-toast hidden" role="alert"></div>
+
+    <section id="resultsWrap" class="results-overlay hidden" aria-label="生成結果">
+      <div class="generated-result png-result-box">
+        <img id="pngResult" alt="完成した背景透過イラスト">
       </div>
-      <a class="icon-button" href="./settings.html" aria-label="設定"><span class="gear">⚙</span><span>設定</span></a>
-    </header>
+      <a id="pngDownload" class="hit png-save-hit" download="illustration.png" aria-label="PNGを保存"><span class="sr-only">PNGを保存</span></a>
 
-    <div class="doodle doodle-left" aria-hidden="true">DRAW<br>MOVE<br>SMILE!<i>〰</i></div>
-
-    <section class="card step-card step-pink capture-card">
-      <div class="section-title">
-        <span class="step">1</span>
-        <div>
-          <h2>絵を取り込む</h2>
-          <p>カメラで撮影するか、端末の画像を選びます。</p>
-        </div>
+      <div class="generated-result gif-result-box">
+        <img id="gifResult" alt="動く背景透過GIF">
       </div>
-
-      <div class="capture-layout">
-        <div class="capture-actions">
-          <button id="cameraBtn" class="action-tile camera-tile" type="button">
-            <span class="tile-icon camera-icon" aria-hidden="true"><i></i></span>
-            <strong>カメラで撮る</strong>
-          </button>
-          <label class="action-tile gallery-tile">
-            <input id="galleryInput" class="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/*">
-            <span class="tile-icon gallery-icon" aria-hidden="true"><i></i></span>
-            <strong>画像を選ぶ</strong>
-          </label>
-        </div>
-
-        <div class="sample-preview" id="samplePreview" aria-hidden="true">
-          <div class="sample-paper">
-            <svg class="sketch-cat" viewBox="0 0 220 170" aria-hidden="true">
-              <g fill="none" stroke="#6b3823" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M57 64 47 28 76 46c16-10 43-10 58 0l29-18-7 39c11 13 14 31 7 49-10 27-38 39-69 34-35-6-53-30-47-60 2-10 5-18 10-26Z" fill="#fffaf1"/>
-                <path d="M86 146v15m39-15v15M64 142l-2 17m84-18 1 17"/>
-                <path d="M155 109c28 4 39-9 37-27-1-11-10-16-16-9-7 8 2 18 9 11"/>
-                <path d="M78 45 66 65m54-20 19 22" stroke="#e88742"/>
-                <path d="M78 82q9 8 18 0m26 0q9 8 18 0"/>
-                <path d="M108 87q-6 8-12 0m12 0q6 8 12 0"/>
-                <path d="M105 94c0 13 20 15 25 2"/>
-                <path d="M57 93 28 84m30 20-31 4m120-14 31-9m-31 19 32 5"/>
-              </g>
-              <path d="M94 105c8 9 19 10 28 1" fill="none" stroke="#f06f78" stroke-width="5" stroke-linecap="round"/>
-              <path d="M82 60c8-6 18-7 27-3m20 0c8-3 15-1 21 4" fill="none" stroke="#e7994d" stroke-width="4" stroke-linecap="round" opacity=".9"/>
-              <path d="M73 115c12 13 58 16 74 0" fill="none" stroke="#e8a15b" stroke-width="4" stroke-dasharray="4 8" stroke-linecap="round" opacity=".65"/>
-            </svg>
-            <span class="scribble s1"></span><span class="scribble s2"></span><span class="scribble s3"></span>
-          </div>
-          <p>こんな絵が<br>動くよ！</p>
-        </div>
-      </div>
-
-      <div class="capture-callout" aria-hidden="true">かいた絵が<br>うごきだす！<i></i></div>
-      <input id="cameraFallback" class="file-input" type="file" accept="image/*" capture="environment">
-
-      <div class="preview-wrap hidden" id="previewWrap">
-        <img id="preview" alt="選択した画像">
-        <button id="clearImage" class="preview-clear" type="button" aria-label="画像を削除">×</button>
-      </div>
+      <a id="gifDownload" class="hit gif-save-hit" download="animation.gif" aria-label="GIFを保存"><span class="sr-only">GIFを保存</span></a>
+      <p id="motionSummary" class="sr-only"></p>
     </section>
-
-    <section class="card step-card step-mint motion-card">
-      <div class="section-title">
-        <span class="step">2</span>
-        <div>
-          <h2>動きを選ぶ</h2>
-          <p>複数選択できます。動きを組み合わせてGIFにします。</p>
-        </div>
-      </div>
-
-      <div id="motionList" class="motion-list" aria-live="polite"></div>
-
-      <div class="motion-settings">
-        <div class="range-card">
-          <div class="range-row">
-            <div>
-              <label for="motionStrength"><span class="range-icon resize-icon">↗</span>動きの大きさ</label>
-              <strong id="motionStrengthLabel">ふつう</strong>
-            </div>
-            <input id="motionStrength" class="range-yellow" type="range" min="50" max="150" value="100" step="10">
-            <div class="range-scale"><span>やさしめ</span><span>大きめ</span></div>
-          </div>
-        </div>
-        <div class="range-card">
-          <div class="range-row">
-            <div>
-              <label for="motionSpeed"><span class="range-icon speed-icon">◴</span>動きの速さ</label>
-              <strong id="motionSpeedLabel">ふつう</strong>
-            </div>
-            <input id="motionSpeed" class="range-pink" type="range" min="70" max="150" value="100" step="10">
-            <div class="range-scale"><span>ゆっくり</span><span>はやい</span></div>
-          </div>
-        </div>
-      </div>
-      <p class="settings-mini-link"><a href="./settings.html#motion-prompts">動きの名前・プロンプトを編集する →</a></p>
-    </section>
-
-    <section class="card step-card step-purple create-card">
-      <div class="section-title">
-        <span class="step">3</span>
-        <div>
-          <h2>作成</h2>
-          <p id="apiState">API設定を確認中…</p>
-          <p id="promptState" class="prompt-state"></p>
-        </div>
-      </div>
-
-      <div class="create-copy" aria-hidden="true">たのしい<br>GIFをつくろう！<span>〃</span></div>
-      <div class="pencil-doodle" aria-hidden="true"><i></i></div>
-      <button id="create" class="primary" disabled><span class="cta-pencil">✎</span><b>イラストとGIFを作る</b><span class="cta-arrow">›</span></button>
-      <a id="goSettings" class="settings-link hidden" href="./settings.html">API設定を開く</a>
-
-      <div id="status" class="status hidden" aria-live="polite">
-        <div class="spinner" aria-hidden="true"></div>
-        <div><strong id="statusTitle">作成中…</strong><p id="statusText">少し時間がかかることがあります。</p></div>
-      </div>
-      <div id="error" class="error hidden" role="alert"></div>
-    </section>
-
-    <section id="resultsWrap" class="results-wrap">
-      <div class="results-title"><span>✦</span> できあがりイメージ <span>✦</span></div>
-      <div id="results" class="results">
-        <article class="result-card result-mint">
-          <div class="result-head">
-            <div><span class="badge">▣</span><h2>完成イラスト（PNG）</h2></div>
-            <a id="pngDownload" class="download" download="illustration.png">⇩ 保存</a>
-          </div>
-          <div class="checker">
-            <div class="placeholder-art clean-cat" aria-hidden="true"><svg class="clean-cat-svg" viewBox="0 0 180 150" aria-hidden="true"><g stroke="#5d2d20" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M49 55 39 22 67 40c14-8 37-8 51 0l28-18-8 35c8 10 10 23 6 36-7 24-32 38-61 35-30-3-50-21-48-46 1-11 6-20 14-27Z" fill="#fffaf2"/><path d="M42 74c-12 3-19-1-26-9m29 18c-12 7-20 7-30 2M134 80c15-2 24-8 29-17m-27 28c15 4 24 1 31-5" fill="none"/><path d="M71 67q7 7 14 0m19 0q7 7 14 0M95 73q-5 6-10 0m10 0q5 6 10 0" fill="none"/><path d="M90 80c0 11 17 14 23 4" fill="none"/><path d="M59 122v16m47-14v15M45 113l-3 19m83-13 4 17" fill="none"/><path d="M138 99c22 2 31-11 27-25-3-10-13-12-17-5-4 8 5 13 11 7" fill="none"/></g><path d="M53 45 45 28l21 13 8 23-18-3Zm69 0 20-14-6 31-17 3Z" fill="#f4a451" opacity=".95"/><path d="M58 104c11 10 45 14 62 4" fill="none" stroke="#f2a452" stroke-width="10" stroke-linecap="round" opacity=".55"/><path d="M89 86c7 7 14 7 20 0" fill="none" stroke="#f06f78" stroke-width="5" stroke-linecap="round"/></svg></div>
-            <img id="pngResult" alt="完成した背景透過イラスト">
-          </div>
-          <p class="result-note">イラストとして<br>使える！</p>
-        </article>
-
-        <article class="result-card result-purple">
-          <div class="result-head">
-            <div><span class="badge">▶</span><h2>アニメーション（GIF）</h2></div>
-            <a id="gifDownload" class="download" download="animation.gif">⇩ 保存</a>
-          </div>
-          <div class="checker animation-placeholder">
-            <span class="ghost g1" aria-hidden="true"><svg class="clean-cat-svg" viewBox="0 0 180 150" aria-hidden="true"><g stroke="#5d2d20" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M49 55 39 22 67 40c14-8 37-8 51 0l28-18-8 35c8 10 10 23 6 36-7 24-32 38-61 35-30-3-50-21-48-46 1-11 6-20 14-27Z" fill="#fffaf2"/><path d="M42 74c-12 3-19-1-26-9m29 18c-12 7-20 7-30 2M134 80c15-2 24-8 29-17m-27 28c15 4 24 1 31-5" fill="none"/><path d="M71 67q7 7 14 0m19 0q7 7 14 0M95 73q-5 6-10 0m10 0q5 6 10 0" fill="none"/><path d="M90 80c0 11 17 14 23 4" fill="none"/><path d="M59 122v16m47-14v15M45 113l-3 19m83-13 4 17" fill="none"/><path d="M138 99c22 2 31-11 27-25-3-10-13-12-17-5-4 8 5 13 11 7" fill="none"/></g><path d="M53 45 45 28l21 13 8 23-18-3Zm69 0 20-14-6 31-17 3Z" fill="#f4a451" opacity=".95"/><path d="M58 104c11 10 45 14 62 4" fill="none" stroke="#f2a452" stroke-width="10" stroke-linecap="round" opacity=".55"/><path d="M89 86c7 7 14 7 20 0" fill="none" stroke="#f06f78" stroke-width="5" stroke-linecap="round"/></svg></span><span class="ghost g2" aria-hidden="true"><svg class="clean-cat-svg" viewBox="0 0 180 150" aria-hidden="true"><g stroke="#5d2d20" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M49 55 39 22 67 40c14-8 37-8 51 0l28-18-8 35c8 10 10 23 6 36-7 24-32 38-61 35-30-3-50-21-48-46 1-11 6-20 14-27Z" fill="#fffaf2"/><path d="M42 74c-12 3-19-1-26-9m29 18c-12 7-20 7-30 2M134 80c15-2 24-8 29-17m-27 28c15 4 24 1 31-5" fill="none"/><path d="M71 67q7 7 14 0m19 0q7 7 14 0M95 73q-5 6-10 0m10 0q5 6 10 0" fill="none"/><path d="M90 80c0 11 17 14 23 4" fill="none"/><path d="M59 122v16m47-14v15M45 113l-3 19m83-13 4 17" fill="none"/><path d="M138 99c22 2 31-11 27-25-3-10-13-12-17-5-4 8 5 13 11 7" fill="none"/></g><path d="M53 45 45 28l21 13 8 23-18-3Zm69 0 20-14-6 31-17 3Z" fill="#f4a451" opacity=".95"/><path d="M58 104c11 10 45 14 62 4" fill="none" stroke="#f2a452" stroke-width="10" stroke-linecap="round" opacity=".55"/><path d="M89 86c7 7 14 7 20 0" fill="none" stroke="#f06f78" stroke-width="5" stroke-linecap="round"/></svg></span>
-            <div class="placeholder-art clean-cat" aria-hidden="true"><svg class="clean-cat-svg" viewBox="0 0 180 150" aria-hidden="true"><g stroke="#5d2d20" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M49 55 39 22 67 40c14-8 37-8 51 0l28-18-8 35c8 10 10 23 6 36-7 24-32 38-61 35-30-3-50-21-48-46 1-11 6-20 14-27Z" fill="#fffaf2"/><path d="M42 74c-12 3-19-1-26-9m29 18c-12 7-20 7-30 2M134 80c15-2 24-8 29-17m-27 28c15 4 24 1 31-5" fill="none"/><path d="M71 67q7 7 14 0m19 0q7 7 14 0M95 73q-5 6-10 0m10 0q5 6 10 0" fill="none"/><path d="M90 80c0 11 17 14 23 4" fill="none"/><path d="M59 122v16m47-14v15M45 113l-3 19m83-13 4 17" fill="none"/><path d="M138 99c22 2 31-11 27-25-3-10-13-12-17-5-4 8 5 13 11 7" fill="none"/></g><path d="M53 45 45 28l21 13 8 23-18-3Zm69 0 20-14-6 31-17 3Z" fill="#f4a451" opacity=".95"/><path d="M58 104c11 10 45 14 62 4" fill="none" stroke="#f2a452" stroke-width="10" stroke-linecap="round" opacity=".55"/><path d="M89 86c7 7 14 7 20 0" fill="none" stroke="#f06f78" stroke-width="5" stroke-linecap="round"/></svg></div>
-            <img id="gifResult" alt="動く背景透過GIF">
-          </div>
-          <p id="motionSummary" class="motion-summary"></p>
-          <p class="share-note">SNSで<br>シェアしよう！</p>
-        </article>
-      </div>
-    </section>
-
-    <footer><p>ー　おえかきで、もっとたのしい毎日を　<span>♥</span></p></footer>
   </main>
 
   <div id="cameraModal" class="camera-modal hidden" role="dialog" aria-modal="true" aria-label="カメラ">
     <div class="camera-panel">
-      <div class="camera-head"><strong>カメラで撮影</strong><button id="cameraClose" type="button" aria-label="閉じる">×</button></div>
+      <div class="camera-head">
+        <strong>カメラで撮影</strong>
+        <button id="cameraClose" type="button" aria-label="閉じる">×</button>
+      </div>
       <video id="cameraVideo" autoplay playsinline muted></video>
       <canvas id="cameraCanvas" class="hidden"></canvas>
-      <div class="camera-buttons"><button id="switchCamera" class="secondary" type="button">前/後を切替</button><button id="takePhoto" class="shutter" type="button">撮影</button></div>
+      <div class="camera-buttons">
+        <button id="switchCamera" class="secondary" type="button">前/後を切替</button>
+        <button id="takePhoto" class="shutter" type="button" aria-label="撮影">撮影</button>
+      </div>
       <p id="cameraMessage" class="camera-message">カメラの使用を許可してください。</p>
     </div>
   </div>
