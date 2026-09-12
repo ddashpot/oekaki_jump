@@ -62,7 +62,7 @@ GIF作成には `gif.js.optimized 1.0.1` を使用し、jsDelivr CDNから読み
 ## manifest の読み込みについて
 
 この版では互換性を高めるため、メインのWeb App Manifestを `manifest.json` に変更しています。
-`manifest.webmanifest` も旧キャッシュ互換用として同梱しています。
+この配布版では転送互換性を優先し、Manifest は `manifest.json` のみ同梱しています。
 
 **重要:** `index.html` をPC上で直接ダブルクリックして `file://` で開くと、ブラウザによってはManifestやService Workerが `Failed to fetch` になります。
 GitHub Pagesなどの **HTTPS** 配信で開くか、ローカル確認ではHTTPサーバー経由で開いてください。
