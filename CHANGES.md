@@ -74,3 +74,11 @@
 - 生成結果を元画像のPNG/GIFカード位置に重ねて表示
 - 保存ボタンを実リンクとして表示し、PNG/GIFのdownload属性を明示
 - APIキー、画像、動きが揃うまで作成ボタンを無効化
+
+
+## v8.1 転送互換性修正
+
+- `icon-512.png` を配布物から除外し、転送時の `Failed to fetch` を回避
+- Manifest のアイコン参照を `icon-192.png` のみに整理
+- 不要な `manifest.webmanifest` を除外
+- Service Worker のプリキャッシュ対象を整理し、キャッシュ名を更新
