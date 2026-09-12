@@ -82,3 +82,17 @@ python -m http.server 8080 --directory docs
 その後 `http://localhost:8080/` を開きます。
 
 `file://` で直接開くと、Service Workerなど一部機能が動作しません。
+
+
+## GitHub Actionsなしで公開する方法
+
+この版には `.github/workflows` を含めていません。
+
+1. リポジトリへこの中身をアップロード
+2. GitHub の `Settings` → `Pages`
+3. `Build and deployment` の `Source` を `Deploy from a branch`
+4. Branch: `main`
+5. Folder: `/docs`
+6. `Save`
+
+これで `docs/` フォルダがそのまま GitHub Pages に公開されます。
