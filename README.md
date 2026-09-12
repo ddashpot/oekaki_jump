@@ -48,3 +48,13 @@ ZIPを展開し、ファイル一式をリポジトリ直下へ配置してく�
 - 保存・共有は右側の縦並びアイコンに整理
 - アイコンの丸背景を廃止し、広いタップ領域だけを残したシンプルな見た目に変更
 - ボタンは背景なしでも 46〜52px のタップ領域を維持
+
+
+## v9.1.3 キャッシュ強制更新
+
+- Web公開後に旧UIが残る問題への対策を追加
+- Service Workerの新規登録を停止
+- 起動時に過去の `oekaki-jump-*` Cache Storage とService Worker登録を削除
+- `screen.css` / `app.js` / `style.css` / `settings.js` / `manifest.json` にバージョン付きURLを使用
+- `sw.js` は旧登録を掃除して自己解除する移行用Service Workerへ変更
+- 「つくる」表示、保存/共有のアイコンのみ表示、丸背景なしの最新UIを維持
