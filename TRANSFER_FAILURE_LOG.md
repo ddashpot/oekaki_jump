@@ -43,3 +43,9 @@
 - [x] `app.js` / `settings.js` / `sw.js` の構文チェック合格
 - [x] `manifest.json` のJSON構文チェック合格
 - [x] 失敗ログ自体はService Workerのプリキャッシュ対象外（実行時に不要な追加fetchを発生させない）
+
+
+## 2026-09-12 v9.1.1 保存・共有UI改善
+- 新規の外部画像ファイルは追加していません。
+- HTML/CSS/JavaScriptのみを変更し、過去の `Failed to fetch` 対策（個別UI画像を作らない方針）を維持しています。
+- Service Workerのキャッシュキーを更新しました。
