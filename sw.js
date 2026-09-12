@@ -1,4 +1,4 @@
-const CACHE = "oekaki-jump-v9-1-embedded-assets";
+const CACHE = "oekaki-jump-v9-1-1-save-share";
 const ASSETS = [
   "./",
   "./index.html",
