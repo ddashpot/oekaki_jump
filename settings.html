@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd84d">
+  <title>設定｜おえかきジャンプ</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="shell settings-shell">
+    <header class="settings-header">
+      <a class="back-button" href="./index.html">← 戻る</a>
+      <div>
+        <h1>設定</h1>
+        <p>APIとイラスト生成の設定</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="section-title">
+        <span class="step">A</span>
+        <div>
+          <h2>OpenAI API</h2>
+          <p>APIキーはGitHubのソースコードには保存されません。</p>
+        </div>
+      </div>
+
+      <label class="field">
+        <span>APIキー</span>
+        <div class="key-row">
+          <input id="apiKey" type="password" autocomplete="off" placeholder="sk-...">
+          <button id="toggleKey" class="secondary small" type="button">表示</button>
+        </div>
+      </label>
+
+      <label class="check-row">
+        <input id="rememberKey" type="checkbox">
+        <span>
+          <strong>この端末にAPIキーを保存する</strong>
+          <small>ONの場合はブラウザのlocalStorageに保存します。</small>
+        </span>
+      </label>
+
+      <div class="warning">
+        公開WebアプリでAPIキーを扱う方式は、サーバー側で秘密情報として管理する方式より安全性が低くなります。
+        共有APIキーをソースコードへ書き込まず、自分のキーだけを使用してください。
+      </div>
+
+      <label class="field">
+        <span>画像モデル</span>
+        <select id="model">
+          <option value="gpt-image-2.5-sunburst">GPT-Image-2.5 Sunburst</option>
+          <option value="gpt-image-2.5-flare">GPT-Image-2.5 Flare</option>
+          <option value="gpt-image-2">GPT-Image-2</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>画質</span>
+        <select id="quality">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="xhigh">XHigh</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <span class="step">B</span>
+        <div>
+          <h2>イラスト生成プロンプト</h2>
+          <p>生成時にこの文章をそのまま使用します。</p>
+        </div>
+      </div>
+
+      <textarea id="promptEditor" class="prompt-editor" rows="17"></textarea>
+      <div class="button-row">
+        <button id="resetPrompt" class="secondary" type="button">初期設定に戻す</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <button id="saveSettings" class="primary" type="button">保存して戻る</button>
+      <div id="saveMessage" class="success hidden">設定を保存しました。</div>
+    </section>
+  </main>
+
+  <script src="./settings.js"></script>
+</body>
+</html>
