@@ -1,0 +1,79 @@
+:root{color-scheme:light;--screen-bg:#fff5c7;--navy:#082b58;--yellow:#ffb914;--pink:#ff5ca6;--cyan:#28b9ef}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--screen-bg)}
+body{font-family:system-ui,-apple-system,"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;overflow-x:hidden}
+button,input,a{font:inherit;-webkit-tap-highlight-color:transparent}
+.poster-stage{position:relative;width:min(100vw,864px);margin:0 auto;line-height:0;background:#fff5c7;overflow:hidden}
+.poster-image{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.hit{position:absolute;display:block;border:0;background:transparent;margin:0;padding:0;cursor:pointer;z-index:5;border-radius:22px}
+.hit:focus-visible{outline:4px solid rgba(11,75,140,.72);outline-offset:2px}
+.settings-hit{left:81.481%;top:1.562%;width:11.111%;height:5.599%;border-radius:50%}
+.camera-hit{left:14.583%;top:15.690%;width:20.833%;height:10.677%}
+.gallery-hit{left:37.616%;top:15.690%;width:20.833%;height:10.677%}
+.create-hit{left:16.204%;top:68.164%;width:66.782%;height:6.641%;border-radius:999px}
+.create-hit:disabled{cursor:not-allowed}
+.create-hit:not(:disabled):active,.camera-hit:active,.gallery-hit:active,.settings-hit:active{background:rgba(255,255,255,.14)}
+.file-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.hidden{display:none!important}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
+/* 選択画像を参考画面のポラロイド位置へそのまま重ねる */
+.preview-overlay{position:absolute;z-index:6;left:59.72%;top:12.56%;width:28.1%;height:14.35%;background:#f8f8f8;border:7px solid #fff;border-radius:12px;box-shadow:0 5px 15px rgba(50,35,10,.22);transform:rotate(4deg);overflow:hidden;line-height:normal}
+.preview-overlay img{display:block;width:100%;height:100%;object-fit:contain;background:#f2f2f2}
+.preview-clear{position:absolute;right:6px;top:6px;width:34px;height:34px;border:0;border-radius:50%;background:rgba(7,36,73,.78);color:#fff;font-size:25px;line-height:34px;cursor:pointer;transform:rotate(-4deg)}
+
+/* 参考画像の6タイルをそのまま見せ、透明な操作層だけを重ねる */
+.motion-hit-grid{position:absolute;z-index:6;left:12.15%;top:35.08%;width:76.16%;height:16.25%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:2.25% 2.1%;line-height:normal}
+.motion-item{position:relative;display:block;min-width:0;min-height:0;cursor:pointer;border-radius:24px}
+.motion-item input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.motion-item .motion-emoji,.motion-item strong,.motion-item small,.motion-item .motion-check{display:none}
+.motion-item:has(input:checked)::after{content:"";position:absolute;inset:-2px;border:3px solid rgba(255,178,0,.98);border-radius:24px;box-shadow:0 0 0 3px rgba(255,255,255,.45) inset;pointer-events:none}
+.motion-item:has(input:checked)::before{content:"✓";position:absolute;right:8px;top:7px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#ffb700;color:#fff;font-weight:900;font-size:20px;line-height:1;box-shadow:0 2px 6px rgba(80,50,0,.14);pointer-events:none}
+
+/* スライダーだけは実値に追従させる。パネルやラベルは背景画像を使用。 */
+.range-hit{position:absolute;z-index:7;height:3.4%;line-height:normal}
+.strength-hit{left:18.8%;top:54.28%;width:27.1%}
+.speed-hit{left:57.4%;top:54.28%;width:27.1%}
+.range-hit input{appearance:none;-webkit-appearance:none;width:100%;height:36px;margin:0;background:transparent;cursor:pointer}
+.range-hit input::-webkit-slider-runnable-track{height:10px;border-radius:999px;background:linear-gradient(90deg,#ffc10d 0 50%,#e9edf3 50% 100%)}
+.speed-hit input::-webkit-slider-runnable-track{background:linear-gradient(90deg,#ff5e9c 0 50%,#e9edf3 50% 100%)}
+.range-hit input::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;background:white;border:1px solid #d7dce3;box-shadow:0 3px 8px rgba(0,0,0,.18);margin-top:-11px}
+.range-hit input::-moz-range-track{height:10px;border-radius:999px;background:#e9edf3}
+.range-hit input::-moz-range-progress{height:10px;border-radius:999px;background:#ffc10d}
+.speed-hit input::-moz-range-progress{background:#ff5e9c}
+.range-hit input::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:white;border:1px solid #d7dce3;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+
+/* 完成後だけ、サンプル部分の上に実データを表示 */
+.results-overlay{position:absolute;inset:0;z-index:8;pointer-events:none}
+.generated-result{position:absolute;overflow:hidden;display:grid;place-items:center;pointer-events:none}
+.generated-result img{display:block;width:100%;height:100%;object-fit:contain}
+.png-result-box{left:9.55%;top:82.25%;width:38.85%;height:11.72%;background-color:#fff;background-image:linear-gradient(45deg,#e6eaeb 25%,transparent 25%),linear-gradient(-45deg,#e6eaeb 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e6eaeb 75%),linear-gradient(-45deg,transparent 75%,#e6eaeb 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0;border-radius:4px}
+.gif-result-box{left:51.68%;top:82.25%;width:38.65%;height:11.72%;background:linear-gradient(180deg,#fff 0,#faf5ff 100%);border-radius:4px}
+.png-save-hit,.gif-save-hit{pointer-events:auto;z-index:9;border-radius:999px}
+.png-save-hit{left:38.08%;top:81.84%;width:10.65%;height:3.39%}
+.gif-save-hit{left:79.51%;top:81.84%;width:10.53%;height:3.39%}
+
+/* 状態表示はポスターの見た目を壊さないフローティング表示 */
+.toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;width:min(calc(100vw - 28px),680px);padding:14px 16px;border-radius:18px;box-shadow:0 14px 40px rgba(16,35,58,.22);line-height:1.45}
+.status-toast{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.97);color:#082b58;border:1px solid #ffe16a}
+.status-toast p{margin:3px 0 0;font-size:12px;color:#667085}
+.error-toast{background:#fff0f3;color:#a3223f;border:1px solid #ffc7d3;font-size:13px;white-space:pre-wrap}
+.spinner{width:28px;height:28px;border:4px solid #ffe391;border-top-color:#ffb400;border-radius:50%;animation:spin .8s linear infinite;flex:0 0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* camera */
+.camera-modal{position:fixed;inset:0;z-index:100;background:rgba(4,14,28,.88);display:flex;align-items:center;justify-content:center;padding:12px;line-height:normal}
+.camera-panel{width:min(700px,100%);background:#111;border-radius:22px;overflow:hidden;color:#fff;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.camera-head{display:flex;justify-content:space-between;align-items:center;padding:12px 15px}
+.camera-head button{border:0;background:#333;color:#fff;border-radius:50%;width:38px;height:38px;font-size:24px;cursor:pointer}
+.camera-panel video{display:block;width:100%;max-height:70vh;object-fit:contain;background:#000}
+.camera-buttons{display:flex;justify-content:center;align-items:center;gap:18px;padding:14px}
+.secondary{border:1px solid #555;background:#2d2d2d;color:#fff;border-radius:13px;padding:10px 14px;font-weight:800;cursor:pointer}
+.shutter{width:72px;height:72px;border-radius:50%;border:7px solid #fff;background:#ffd84d;font-size:0;cursor:pointer}
+.camera-message{text-align:center;color:#ddd;font-size:12px;margin:0;padding:0 12px 14px}
+
+@media(min-width:920px){body{padding:24px}.poster-stage{border-radius:24px;box-shadow:0 18px 55px rgba(80,59,0,.18)}}
+
+/* v7: 通常時は提供された画面画像を1pxも置き換えない。操作レイヤーは透明。 */
+.motion-item:has(input:checked)::after,.motion-item:has(input:checked)::before{display:none!important}
+.range-hit input{opacity:0}
