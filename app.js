@@ -41,6 +41,8 @@ const pngResult = $("pngResult");
 const gifResult = $("gifResult");
 const pngDownload = $("pngDownload");
 const gifDownload = $("gifDownload");
+const pngShare = $("pngShare");
+const gifShare = $("gifShare");
 const motionStrength = $("motionStrength");
 const motionSpeed = $("motionSpeed");
 
@@ -48,6 +50,8 @@ let chosenFile = null;
 let previewUrl = null;
 let pngUrl = null;
 let gifUrl = null;
+let pngOutputBlob = null;
+let gifOutputBlob = null;
 let cameraStream = null;
 let facingMode = "environment";
 let workerBlobUrl = null;
@@ -341,20 +345,24 @@ createBtn.addEventListener("click",async()=>{
   try{
     setStatus("イラストを作成中…",`「${getActivePrompt().name}」と動きプロンプトを使って生成しています。`);
     const pngBlob=await generateIllustration(motions);
+    pngOutputBlob=pngBlob;
     if(pngUrl)URL.revokeObjectURL(pngUrl);
     pngUrl=URL.createObjectURL(pngBlob);
     pngResult.src=pngUrl;
     pngDownload.href=pngUrl;
     pngDownload.classList.remove("is-disabled");
     pngDownload.setAttribute("aria-disabled","false");
+    pngShare.disabled=false;
     setStatus("GIFを作成中…","選択した動きを組み合わせています。");
     const gifBlob=await makeGif(pngBlob,motions);
+    gifOutputBlob=gifBlob;
     if(gifUrl)URL.revokeObjectURL(gifUrl);
     gifUrl=URL.createObjectURL(gifBlob);
     gifResult.src=gifUrl;
     gifDownload.href=gifUrl;
     gifDownload.classList.remove("is-disabled");
     gifDownload.setAttribute("aria-disabled","false");
+    gifShare.disabled=false;
     $("motionSummary").textContent="動き: "+motions.map(m=>m.name).join(" ＋ ");
     hideStatus();
     resultsWrap.classList.remove("hidden");
@@ -378,6 +386,26 @@ function installDownload(link, filename){
 }
 installDownload(pngDownload,"illustration.png");
 installDownload(gifDownload,"animation.gif");
+
+async function shareOutput(blob, filename, title, fallbackLink){
+  if(!blob) return;
+  const file = new File([blob], filename, {type: blob.type || (filename.endsWith(".gif") ? "image/gif" : "image/png")});
+  try{
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      await navigator.share({title, text:"おえかきジャンプで作りました", files:[file]});
+      return;
+    }
+    // ファイル共有に非対応のブラウザでは、まず保存して端末の共有機能を使えるようにする。
+    fallbackLink.click();
+    showError("このブラウザでは画像ファイルを直接共有できないため、端末へ保存しました。保存した画像を写真・ファイルアプリから共有してください。");
+  }catch(err){
+    if(err && err.name === "AbortError") return;
+    showError("共有を開始できませんでした。『保存』してから端末の共有メニューをお使いください。");
+  }
+}
+
+pngShare.addEventListener("click",()=>shareOutput(pngOutputBlob,"illustration.png","完成イラスト",pngDownload));
+gifShare.addEventListener("click",()=>shareOutput(gifOutputBlob,"animation.gif","アニメーションGIF",gifDownload));
 
 renderMotions();
 updateReadyState();
