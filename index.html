@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffd84d">
-  <meta name="description" content="子どもの絵を背景透過PNGとジャンプGIFにするウェブアプリ">
+  <meta name="description" content="子どもの絵を背景透過PNGと動くGIFにするウェブアプリ">
   <title>おえかきジャンプ</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon-192.png">
@@ -13,52 +13,106 @@
 </head>
 <body>
   <main class="shell">
-    <header class="hero">
-      <div class="logo" aria-hidden="true">✏️</div>
-      <div>
-        <h1>おえかきジャンプ</h1>
-        <p>紙の絵から、背景透過PNG＋ジャンプGIFを一度に作ります。</p>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">✏️</div>
+        <div>
+          <h1>おえかきジャンプ</h1>
+          <p>絵をイラストにして、好きな動きをつける</p>
+        </div>
       </div>
+      <a class="icon-button" href="./settings.html" aria-label="設定">⚙️<span>設定</span></a>
     </header>
 
-    <section class="card api-card">
+    <section class="card">
       <div class="section-title">
         <span class="step">1</span>
         <div>
-          <h2>OpenAI APIキー</h2>
-          <p>このページを開いている間だけ使用します。保存しません。</p>
+          <h2>絵を取り込む</h2>
+          <p>カメラで撮影するか、端末の画像を選びます。</p>
         </div>
       </div>
 
-      <div class="key-row">
-        <input id="apiKey" type="password" inputmode="text" autocomplete="off"
-               placeholder="sk-..." aria-label="OpenAI API key">
-        <button id="toggleKey" type="button" class="secondary small">表示</button>
+      <div class="capture-actions">
+        <button id="cameraBtn" class="action-tile" type="button">
+          <span class="big-icon">📷</span>
+          <strong>カメラで撮る</strong>
+          <small>背面カメラを起動</small>
+        </button>
+        <label class="action-tile">
+          <input id="galleryInput" class="file-input" type="file" accept="image/png,image/jpeg,image/webp,image/*">
+          <span class="big-icon">🖼️</span>
+          <strong>画像を選ぶ</strong>
+          <small>端末内の画像を使用</small>
+        </label>
       </div>
-      <p class="warning">
-        GitHub Pagesは公開サイトです。APIキーをHTMLやJavaScriptに書き込まないでください。
-        入力したキーはブラウザからOpenAI APIへ直接送信されます。
-      </p>
+
+      <!-- getUserMedia非対応端末用フォールバック -->
+      <input id="cameraFallback" class="file-input" type="file" accept="image/*" capture="environment">
+
+      <div class="preview-wrap hidden" id="previewWrap">
+        <img id="preview" alt="選択した画像">
+        <button id="clearImage" class="preview-clear" type="button">×</button>
+      </div>
     </section>
 
     <section class="card">
       <div class="section-title">
         <span class="step">2</span>
         <div>
-          <h2>絵を選ぶ</h2>
-          <p>紙・文字・背景が写っていてもOKです。</p>
+          <h2>動きを選ぶ</h2>
+          <p>複数選択できます。動きを組み合わせてGIFにします。</p>
         </div>
       </div>
 
-      <label class="upload" id="dropzone">
-        <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/*">
-        <span class="upload-icon">📷</span>
-        <span class="upload-title">写真を撮る・画像を選ぶ</span>
-        <span class="upload-sub">JPEG / PNG / WebP</span>
-      </label>
+      <div id="motionList" class="motion-list">
+        <label class="motion-item">
+          <input type="checkbox" data-motion="jump" checked>
+          <span class="motion-emoji">⬆️</span>
+          <span><strong>ジャンプ</strong><small>上下にぴょんぴょん</small></span>
+        </label>
+        <label class="motion-item">
+          <input type="checkbox" data-motion="sway">
+          <span class="motion-emoji">↔️</span>
+          <span><strong>左右ゆれ</strong><small>体を左右にゆらす</small></span>
+        </label>
+        <label class="motion-item">
+          <input type="checkbox" data-motion="float">
+          <span class="motion-emoji">☁️</span>
+          <span><strong>ふわふわ</strong><small>ゆっくり浮かぶ</small></span>
+        </label>
+        <label class="motion-item">
+          <input type="checkbox" data-motion="rotate">
+          <span class="motion-emoji">🔄</span>
+          <span><strong>くるくる</strong><small>少しだけ回転する</small></span>
+        </label>
+        <label class="motion-item">
+          <input type="checkbox" data-motion="shake">
+          <span class="motion-emoji">〰️</span>
+          <span><strong>ぷるぷる</strong><small>小刻みに震える</small></span>
+        </label>
+        <label class="motion-item">
+          <input type="checkbox" data-motion="squash">
+          <span class="motion-emoji">↕️</span>
+          <span><strong>伸び縮み</strong><small>弾むように変形</small></span>
+        </label>
+      </div>
 
-      <div class="preview-wrap hidden" id="previewWrap">
-        <img id="preview" alt="選択した画像">
+      <div class="motion-settings">
+        <div class="range-row">
+          <div>
+            <label for="motionStrength">動きの大きさ</label>
+            <strong id="motionStrengthLabel">ふつう</strong>
+          </div>
+          <input id="motionStrength" type="range" min="50" max="150" value="100" step="10">
+        </div>
+        <div class="range-row">
+          <div>
+            <label for="motionSpeed">動きの速さ</label>
+            <strong id="motionSpeedLabel">ふつう</strong>
+          </div>
+          <input id="motionSpeed" type="range" min="70" max="150" value="100" step="10">
+        </div>
       </div>
     </section>
 
@@ -66,48 +120,21 @@
       <div class="section-title">
         <span class="step">3</span>
         <div>
-          <h2>動きを決める</h2>
-          <p>イラストのデザインは変えず、上下にジャンプさせます。</p>
+          <h2>作成</h2>
+          <p id="apiState">API設定を確認中…</p>
         </div>
       </div>
-
-      <div class="control">
-        <div class="control-head">
-          <label for="jump">ジャンプの高さ</label>
-          <strong id="jumpValue">ふつう</strong>
-        </div>
-        <input id="jump" type="range" min="80" max="240" value="160" step="10">
-      </div>
-
-      <details class="advanced">
-        <summary>詳細設定</summary>
-        <label class="select-label">
-          画像モデル
-          <select id="model">
-            <option value="gpt-image-2.5-sunburst" selected>GPT-Image-2.5 Sunburst（高品質）</option>
-            <option value="gpt-image-2">GPT-Image-2</option>
-          </select>
-        </label>
-        <label class="select-label">
-          画質
-          <select id="quality">
-            <option value="low">Low</option>
-            <option value="medium" selected>Medium</option>
-            <option value="high">High</option>
-          </select>
-        </label>
-      </details>
 
       <button id="create" class="primary" disabled>イラストとGIFを作る</button>
+      <a id="goSettings" class="settings-link hidden" href="./settings.html">API設定を開く</a>
 
       <div id="status" class="status hidden" aria-live="polite">
         <div class="spinner" aria-hidden="true"></div>
         <div>
-          <strong id="statusTitle">イラストを作成中…</strong>
-          <p id="statusText">画像生成には少し時間がかかります。</p>
+          <strong id="statusTitle">作成中…</strong>
+          <p id="statusText">少し時間がかかることがあります。</p>
         </div>
       </div>
-
       <div id="error" class="error hidden" role="alert"></div>
     </section>
 
@@ -120,32 +147,44 @@
           </div>
           <a id="pngDownload" class="download" download="illustration.png">保存</a>
         </div>
-        <div class="checker">
-          <img id="pngResult" alt="完成した背景透過イラスト">
-        </div>
+        <div class="checker"><img id="pngResult" alt="完成した背景透過イラスト"></div>
       </article>
 
       <article class="result-card">
         <div class="result-head">
           <div>
             <span class="badge">GIF</span>
-            <h2>ジャンプGIF</h2>
+            <h2>アニメーション</h2>
           </div>
-          <a id="gifDownload" class="download" download="jump.gif">保存</a>
+          <a id="gifDownload" class="download" download="animation.gif">保存</a>
         </div>
-        <div class="checker">
-          <img id="gifResult" alt="ジャンプする背景透過GIF">
-        </div>
+        <div class="checker"><img id="gifResult" alt="動く背景透過GIF"></div>
+        <p id="motionSummary" class="motion-summary"></p>
       </article>
     </section>
 
     <footer>
-      <p>AndroidのChromeでは、メニューの「ホーム画面に追加」でアプリのように使えます。</p>
+      <p>カメラ機能はHTTPSで動作します。GitHub PagesはHTTPS対応です。</p>
     </footer>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.js"
-          id="gifLibrary"></script>
+  <div id="cameraModal" class="camera-modal hidden" role="dialog" aria-modal="true" aria-label="カメラ">
+    <div class="camera-panel">
+      <div class="camera-head">
+        <strong>カメラで撮影</strong>
+        <button id="cameraClose" type="button" aria-label="閉じる">×</button>
+      </div>
+      <video id="cameraVideo" autoplay playsinline muted></video>
+      <canvas id="cameraCanvas" class="hidden"></canvas>
+      <div class="camera-buttons">
+        <button id="switchCamera" class="secondary" type="button">前/後を切替</button>
+        <button id="takePhoto" class="shutter" type="button">撮影</button>
+      </div>
+      <p id="cameraMessage" class="camera-message">カメラの使用を許可してください。</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized@1.0.1/dist/gif.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
