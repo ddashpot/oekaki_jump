@@ -58,3 +58,17 @@ GIFの移動・回転・伸縮そのものはブラウザ内のアニメーシ�
 ## 外部ライブラリ
 
 GIF作成には `gif.js.optimized 1.0.1` を使用し、jsDelivr CDNから読み込みます。GIF変換自体はブラウザ内で行います。
+
+## manifest の読み込みについて
+
+この版では互換性を高めるため、メインのWeb App Manifestを `manifest.json` に変更しています。
+`manifest.webmanifest` も旧キャッシュ互換用として同梱しています。
+
+**重要:** `index.html` をPC上で直接ダブルクリックして `file://` で開くと、ブラウザによってはManifestやService Workerが `Failed to fetch` になります。
+GitHub Pagesなどの **HTTPS** 配信で開くか、ローカル確認ではHTTPサーバー経由で開いてください。
+
+例:
+```bash
+python3 -m http.server 8000
+```
+その後 `http://localhost:8000/` を開きます。
