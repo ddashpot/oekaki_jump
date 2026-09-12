@@ -87,6 +87,18 @@ function currentMotionConfigs(){
 }
 function selectedEffects(motions){ return [...new Set(motions.map(m => m.effect))]; }
 
+function motionVisual(m){
+  const effect = m.effect || m.id;
+  const cat = `<g stroke="#713720" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M25 23 21 10l11 7c7-5 18-5 25 0l12-7-4 14c4 5 5 11 3 17-4 11-16 17-28 15-15-2-23-12-21-24 1-4 3-7 6-9Z" fill="#fff9ef"/><path d="M34 31q4 4 8 0m10 0q4 4 8 0M46 34q-3 4-6 0m6 0q3 4 6 0" fill="none"/><path d="M65 39c10 2 14-4 13-10" fill="none"/></g><path d="M35 19c4-3 8-3 12-2m5 0c4-1 8 0 11 3" stroke="#f29a45" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  if(effect === 'jump') return `<svg class="motion-art" viewBox="0 0 86 62" aria-hidden="true"><g transform="translate(3 5)">${cat}</g><path d="M9 31q-5 3-5 8m7-19-6-3m68 4 6 4m-7 7 7 8" fill="none" stroke="#ff923d" stroke-width="3.5" stroke-linecap="round"/></svg>`;
+  if(effect === 'sway') return `<svg class="motion-art" viewBox="0 0 92 62" aria-hidden="true"><g transform="translate(6 5)">${cat}</g><path d="M8 25 2 31l6 6M84 25l6 6-6 6" fill="none" stroke="#2baee9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  if(effect === 'float') return `<svg class="motion-art" viewBox="0 0 92 62" aria-hidden="true"><g fill="#66c8ff"><circle cx="37" cy="33" r="16"/><circle cx="52" cy="26" r="13"/><circle cx="64" cy="35" r="15"/><rect x="34" y="32" width="36" height="16" rx="8"/></g><path d="M43 37q4 5 8 0m9 0q4 5 8 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="m16 21 2 5 5 2-5 2-2 5-2-5-5-2 5-2Zm65 17 2 4 4 2-4 2-2 4-2-4-4-2 4-2Z" fill="#ffc333"/></svg>`;
+  if(effect === 'rotate') return `<svg class="motion-art" viewBox="0 0 92 62" aria-hidden="true"><path d="M63 18c-14-11-36-5-41 10-5 15 9 29 23 24 10-4 12-15 5-21-6-5-15-1-15 6 0 6 7 8 11 4" fill="none" stroke="#985af0" stroke-width="8" stroke-linecap="round"/><path d="m63 11 13 4-8 10Z" fill="#985af0"/><path d="m23 14 2 4 4 2-4 2-2 4-2-4-4-2 4-2Z" fill="#b276ff"/></svg>`;
+  if(effect === 'shake') return `<svg class="motion-art" viewBox="0 0 92 62" aria-hidden="true"><g transform="translate(7 6)">${cat}</g><path d="M10 18q-6 5 0 10t0 10m72-20q6 5 0 10t0 10" fill="none" stroke="#aa59e9" stroke-width="3" stroke-linecap="round"/></svg>`;
+  if(effect === 'squash') return `<svg class="motion-art" viewBox="0 0 92 62" aria-hidden="true"><g transform="translate(7 6) scale(.9 1.03)">${cat}</g><path d="M10 13v37m0-37-5 7m5-7 5 7m-5 30-5-7m5 7 5-7m72-30v37m0-37-5 7m5-7 5 7m-5 30-5-7m5 7 5-7" fill="none" stroke="#8057e7" stroke-width="3" stroke-linecap="round"/></svg>`;
+  return `<span class="motion-fallback">${m.emoji || '✨'}</span>`;
+}
+
 function renderMotions(){
   const list = $("motionList");
   const stored = readJson("oekaki.selectedMotionIds");
@@ -105,7 +117,7 @@ function renderMotions(){
     input.checked = selectedSet.has(m.id);
     const icon = document.createElement("span");
     icon.className = "motion-emoji";
-    icon.textContent = m.emoji || "✨";
+    icon.innerHTML = motionVisual(m);
     const strong = document.createElement("strong");
     strong.textContent = m.name;
     const small = document.createElement("small");
@@ -140,7 +152,6 @@ function setFile(file){
   preview.src = previewUrl;
   previewWrap.classList.remove("hidden");
   $("samplePreview")?.classList.add("hidden");
-  resultsWrap.classList.add("hidden");
   clearError();
   updateReadyState();
 }
@@ -286,7 +297,7 @@ async function makeGif(pngBlob,motions){
 }
 
 createBtn.addEventListener("click",async()=>{
-  clearError(); resultsWrap.classList.add("hidden");
+  clearError();
   const motions=currentMotionConfigs(); if(!chosenFile||!motions.length)return;
   createBtn.disabled=true;
   try{
